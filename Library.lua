@@ -273,7 +273,7 @@
             local InitialPosition 
 
             Parent.InputBegan:Connect(function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     Dragging = true
                     InitialPosition = Input.Position
                     InitialSize = Parent.Position
@@ -281,35 +281,24 @@
             end)
 
             Parent.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     Dragging = false
                 end
             end)
 
             Library:Connection(InputService.InputChanged, function(Input, game_event) 
-                if Dragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local Horizontal = Camera.ViewportSize.X
-                    local Vertical = Camera.ViewportSize.Y
-
+                if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
                     local NewPosition = dim2(
                         0,
-                        math.clamp(
-                            InitialSize.X.Offset + (Input.Position.X - InitialPosition.X),
-                            0,
-                            Horizontal - Parent.Size.X.Offset
-                        ),
+                        InitialSize.X.Offset + (Input.Position.X - InitialPosition.X),
                         0,
-                        math.clamp(
-                            InitialSize.Y.Offset + (Input.Position.Y - InitialPosition.Y),
-                            0,
-                            Vertical - Parent.Size.Y.Offset
-                        )
+                        InitialSize.Y.Offset + (Input.Position.Y - InitialPosition.Y)
                     )
 
                     Parent.Position = NewPosition
                 end
             end)
-        end 
+        end
 
         function Library:Convert(str)
             local Values = {}
@@ -1111,7 +1100,7 @@
                 local Pickers = {Items.Primary, Items.Secondary}
                 for _,picker in Pickers do
                     Library:Connection(InputService.InputBegan, function(input, game_event)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                             if picker.Items.Colorpicker.Visible and not Library:Hovering({picker.Items.ColorpickerObject, picker.Items.Colorpicker}) then
                                 picker.SetVisible(false)
                                 picker.Open = false
@@ -1189,13 +1178,13 @@
             end)
 
             InputService.InputChanged:Connect(function(input)
-                if (DraggingSat or DraggingHue or DraggingAlpha) and input.UserInputType == Enum.UserInputType.MouseMovement then
+                if (DraggingSat or DraggingHue or DraggingAlpha) and input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
                     Cfg.UpdateColor() 
                 end
             end)
 
             Library:Connection(InputService.InputEnded, function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     DraggingSat = false
                     DraggingHue = false
                     DraggingAlpha = false
@@ -3713,7 +3702,7 @@
             end)
 
             Library:Connection(InputService.InputChanged, function(input)
-                if Cfg.Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then 
+                if Cfg.Dragging and input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then 
                     local Size = (input.Position.X - Items.Outline.AbsolutePosition.X) / Items.Outline.AbsoluteSize.X
                     local Value = ((Cfg.Max - Cfg.Min) * Size) + Cfg.Min
                     Cfg.Set(Value)
@@ -3721,7 +3710,7 @@
             end)
 
             Library:Connection(InputService.InputEnded, function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     Cfg.Dragging = false
                 end 
             end)
@@ -4069,7 +4058,7 @@
             end)
 
             Library:Connection(InputService.InputBegan, function(input, game_event)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     print("clicked")
                     if (Items.DropdownElements.Visible) and not Library:Hovering({Items.DropdownElements, Items.Dropdown}) then
                         Cfg.SetVisible(false)
@@ -4619,7 +4608,7 @@
             end)
 
             Library:Connection(InputService.InputBegan, function(input, game_event) 
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     if (Items.Dropdown.Items.DropdownElements.Visible and Items.ModeHolder.Visible) and not (Library:Hovering(Items.Dropdown.Items.DropdownElements) or Library:Hovering(Items.ModeHolder)) then 
                         Items.Dropdown.SetVisible(false)
                         Items.Dropdown.Visible = false
