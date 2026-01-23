@@ -2802,7 +2802,7 @@ local function getCurrentTool()
     
     return nil
 end
-
+--[[
 local function hideHeadFE()
     if not game.Players.LocalPlayer.Character then return end
     
@@ -2868,7 +2868,7 @@ local function showHeadFE()
     
     originalMotors = {}
 end
-
+--]]
 local function enableNoFallDmg()
     if getgenv().CONFIG.Misc.NoFallHook then getgenv().CONFIG.Misc.NoFallHook = nil end
     getgenv().CONFIG.Misc.NoFallHook = hookmetamethod(game, "__namecall", function(self, ...)
@@ -3444,7 +3444,315 @@ UI:CreateElement("slider", section_movement, {name = "jump power value", flag = 
 
 local section_visual = UI:CreateElement("section", column1_misc, {name = "visual"})
 UI:CreateElement("toggle", section_visual, {name = "loop fov", flag = "misc_loopfov", default = false, callback = function(value) getgenv().CONFIG.Misc.LoopFOVEnabled = value if value then enableLoopFOV() else disableLoopFOV() end end})
-UI:CreateElement("toggle", section_visual, {name = "hide head", flag = "misc_hidehead", default = false, callback = function(value) getgenv().CONFIG.Misc.HideHeadEnabled = value if value then hideHeadFE() else showHeadFE() end end})
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local hideHeadEnabled = false
+local handsUpEnabled = false
+local char = nil
+local torso = nil
+local originalNeckData = nil
+local renderConnection = nil
+local originalMotor6DData = {}
+local originalHook = nil
+local hasTool = false
+local toolConnection = nil
+local fixMotor6DConnection = nil
+local firstRecordedData = {}
+local isFirstTimeRecorded = false
+
+local function createHook()
+    if originalHook then
+        hookmetamethod(game, "__namecall", originalHook)
+    end
+    
+    originalHook = hookmetamethod(game, "__namecall", function(self, ...)
+        local methodName = getnamecallmethod()
+        
+        if tostring(methodName) == "FireServer" then
+            if self.Name == "MOVZREP" then
+                local arg1, arg2
+                
+                if hideHeadEnabled and handsUpEnabled then
+                    arg1 = vector.create(-5754.19873046875, 9848.3056640625, 1096.6358642578125)
+                    arg2 = vector.create(-4778.53564453125, 0.33680424094200134, -339.89031982421875)
+                elseif hideHeadEnabled then
+                    arg1 = Vector3.new(-5721.2001953125, -5, 971.5162353515625)
+                    arg2 = Vector3.new(-4181.38818359375, -6, 11.123311996459961)
+                elseif handsUpEnabled then
+                    arg1 = vector.create(-5754.19873046875, 9848.3056640625, 1096.6358642578125)
+                    arg2 = vector.create(-4778.53564453125, 0.33680424094200134, -339.89031982421875)
+                end
+                
+                if arg1 and arg2 then
+                    local fixedArguments = {
+                        {
+                            {
+                                arg1,
+                                arg2,
+                                Vector3.new(0.006237113382667303, -6, -0.18136750161647797),
+                                true,
+                                true,
+                                true,
+                                false
+                            },
+                            false,
+                            false,
+                            15.8
+                        }
+                    }
+                    
+                    return originalHook(self, table.unpack(fixedArguments))
+                end
+            end
+        end
+        
+        return originalHook(self, ...)
+    end)
+end
+
+local function hideHead()
+    if not Players.LocalPlayer.Character then return end
+    
+    local player = Players.LocalPlayer
+    char = player.Character
+    local head = char:WaitForChild("Head")
+    torso = char:FindFirstChild("Torso")
+    
+    if not torso then return end
+    
+    local neck = torso:FindFirstChild("Neck")
+    if neck then
+        originalNeckData = {
+            Part0 = neck.Part0,
+            Part1 = neck.Part1,
+            C0 = neck.C0,
+            C1 = neck.C1
+        }
+        
+        neck.Part0 = torso
+        neck.Part1 = head
+        neck.C0 = CFrame.new(0, -0.25, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+        neck.C1 = CFrame.new(0, 0.5, 0)
+    end
+    
+    hideHeadEnabled = true
+    createHook()
+    
+    if renderConnection then
+        renderConnection:Disconnect()
+    end
+    
+    renderConnection = RunService.RenderStepped:Connect(function()
+        if torso and torso.Parent then
+            if neck and neck.Parent then
+                neck.C0 = CFrame.new(0, -0.25, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+            end
+        else
+            if renderConnection then
+                renderConnection:Disconnect()
+                renderConnection = nil
+            end
+        end
+    end)
+end
+
+local function showHead()
+    if renderConnection then
+        renderConnection:Disconnect()
+        renderConnection = nil
+    end
+    
+    hideHeadEnabled = false
+    
+    if handsUpEnabled then
+        createHook()
+    else
+        if originalHook then
+            hookmetamethod(game, "__namecall", originalHook)
+            originalHook = nil
+        end
+    end
+    
+    if char and torso then
+        local neck = torso:FindFirstChild("Neck")
+        if neck and originalNeckData then
+            neck.Part0 = originalNeckData.Part0
+            neck.Part1 = originalNeckData.Part1
+            neck.C0 = originalNeckData.C0
+            neck.C1 = originalNeckData.C1
+        end
+    end
+    
+    originalNeckData = nil
+    char = nil
+    torso = nil
+end
+
+local function recordFirstMotor6DData()
+    if not Players.LocalPlayer.Character then return end
+    
+    local character = Players.LocalPlayer.Character
+    local torsoPart = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+    if not torsoPart then return end
+    
+    firstRecordedData = {}
+    
+    for _, motor in pairs(torsoPart:GetChildren()) do
+        if motor:IsA("Motor6D") then
+            firstRecordedData[motor.Name] = {
+                C0 = motor.C0,
+                C1 = motor.C1
+            }
+        end
+    end
+    
+    isFirstTimeRecorded = true
+end
+
+local function keepMotor6DFixed()
+    if not Players.LocalPlayer.Character then return end
+    
+    local character = Players.LocalPlayer.Character
+    local torsoPart = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+    if not torsoPart then return end
+    
+    for motorName, data in pairs(firstRecordedData) do
+        local motor = torsoPart:FindFirstChild(motorName)
+        if motor then
+            motor.C0 = data.C0
+            motor.C1 = data.C1
+        end
+    end
+end
+
+local function saveOriginalMotor6DData()
+    if not Players.LocalPlayer.Character then return end
+    
+    local character = Players.LocalPlayer.Character
+    local torsoPart = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+    if not torsoPart then return end
+    
+    originalMotor6DData = {}
+    
+    for _, motor in pairs(torsoPart:GetChildren()) do
+        if motor:IsA("Motor6D") then
+            originalMotor6DData[motor.Name] = {
+                C0 = motor.C0,
+                C1 = motor.C1
+            }
+        end
+    end
+end
+
+local function restoreMotor6DToOriginal()
+    if not Players.LocalPlayer.Character then return end
+    
+    local character = Players.LocalPlayer.Character
+    local torsoPart = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+    if not torsoPart then return end
+    
+    for motorName, data in pairs(originalMotor6DData) do
+        local motor = torsoPart:FindFirstChild(motorName)
+        if motor then
+            motor.C0 = data.C0
+            motor.C1 = data.C1
+        end
+    end
+end
+
+local function checkTool()
+    if not Players.LocalPlayer.Character then return false end
+    
+    local character = Players.LocalPlayer.Character
+    local tool = character:FindFirstChildOfClass("Tool")
+    
+    local newHasTool = tool ~= nil
+    
+    if newHasTool ~= hasTool then
+        hasTool = newHasTool
+        
+        if hasTool then
+            if not isFirstTimeRecorded then
+                recordFirstMotor6DData()
+                saveOriginalMotor6DData()
+            end
+            
+            if fixMotor6DConnection then
+                fixMotor6DConnection:Disconnect()
+            end
+            fixMotor6DConnection = RunService.RenderStepped:Connect(keepMotor6DFixed)
+        else
+            if fixMotor6DConnection then
+                fixMotor6DConnection:Disconnect()
+                fixMotor6DConnection = nil
+            end
+            restoreMotor6DToOriginal()
+        end
+    end
+    
+    return hasTool
+end
+
+local function enableHandsUp()
+    handsUpEnabled = true
+    isFirstTimeRecorded = false
+    createHook()
+    
+    if toolConnection then
+        toolConnection:Disconnect()
+    end
+    
+    toolConnection = RunService.RenderStepped:Connect(function()
+        if handsUpEnabled then
+            checkTool()
+        end
+    end)
+end
+
+local function disableHandsUp()
+    handsUpEnabled = false
+    
+    if toolConnection then
+        toolConnection:Disconnect()
+        toolConnection = nil
+    end
+    
+    if fixMotor6DConnection then
+        fixMotor6DConnection:Disconnect()
+        fixMotor6DConnection = nil
+    end
+    
+    if hideHeadEnabled then
+        createHook()
+    else
+        if originalHook then
+            hookmetamethod(game, "__namecall", originalHook)
+            originalHook = nil
+        end
+    end
+    
+    restoreMotor6DToOriginal()
+    firstRecordedData = {}
+    originalMotor6DData = {}
+    hasTool = false
+    isFirstTimeRecorded = false
+end
+UI:CreateElement("toggle", section_visual, {name = "Hide Head", flag = "misc_hidehead", default = false, callback = function(value)
+    if value then
+        hideHead()
+    else
+        showHead()
+    end
+end})
+
+UI:CreateElement("toggle", section_visual, {name = "Hands Up", flag = "misc_handsup", default = false, callback = function(value)
+    if value then
+        enableHandsUp()
+    else
+        disableHandsUp()
+    end
+end})
 
 local section_other = UI:CreateElement("section", column2_misc, {name = "other"})
 UI:CreateElement("toggle", section_other, {name = "inf stamina", flag = "misc_infstamina", default = false, callback = function(value) getgenv().CONFIG.Misc.InfStaminaEnabled = value if value then enableInfStamina() else disableInfStamina() end end})
