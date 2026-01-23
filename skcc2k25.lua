@@ -1060,6 +1060,7 @@ RunService.Heartbeat:Connect(function()
         
         if currentTime - lastShotTime >= rapidWaitTime then
             shootAtTarget(target)
+            wait(0.25)
             shootAtTarget(target)
             lastShotTime = currentTime
         end
