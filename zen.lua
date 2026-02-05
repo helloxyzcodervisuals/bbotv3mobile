@@ -268,6 +268,54 @@ function Library:CreateWindow(cfg)
             end
             
             Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(Resize)
+            function Group:AddLabel(text)
+                local Label = { 
+                    Type = "Label", 
+                    Value = text or "",
+                    Connections = {}
+                }
+                
+                local LblFrame = Instance.new("Frame", Content)
+                LblFrame.Size = UDim2.new(1, -10, 0, 20)
+                LblFrame.BackgroundTransparency = 1
+                
+                local LabelText = Instance.new("TextLabel", LblFrame)
+                LabelText.Size = UDim2.new(1, 0, 1, 0)
+                LabelText.Text = Label.Value
+                LabelText.TextColor3 = Library.Theme.TextColor
+                LabelText.Font = Library.Theme.Font
+                LabelText.TextSize = 13
+                LabelText.TextXAlignment = Enum.TextXAlignment.Left
+                LabelText.BackgroundTransparency = 1
+                
+                function Label:Set(newText)
+                    if Label.Value ~= newText then
+                        Label.Value = newText
+                        LabelText.Text = newText
+                        
+                        for _, callback in pairs(Label.Connections) do
+                            coroutine.wrap(callback)(newText)
+                        end
+                    end
+                end
+                
+                function Label:Connect(callback)
+                    table.insert(Label.Connections, callback)
+                    return {
+                        Disconnect = function()
+                            for i, conn in ipairs(Label.Connections) do
+                                if conn == callback then
+                                    table.remove(Label.Connections, i)
+                                    break
+                                end
+                            end
+                        end
+                    }
+                end
+                
+                Resize()
+                return Label
+            end
             
             function Group:AddToggle(id, data)
                 local Tgl = { 
