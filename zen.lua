@@ -2,7 +2,7 @@ local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
-
+--ngf
 local Library = {
     Options = {},
     Theme = {
@@ -1008,8 +1008,6 @@ function Library:CreateWindow(cfg)
                 configData[id] = {Type = "Toggle", Value = option.Value}
             elseif option.Type == "Slider" then
                 configData[id] = {Type = "Slider", Value = option.Value}
-            elseif option.Type == "ListBox" then
-                configData[id] = {Type = "ListBox", Value = option.Value, Items = option.Items}
             elseif option.Type == "Input" then
                 configData[id] = {Type = "Input", Value = option.Value}
             elseif option.Type == "ColorPicker" then
@@ -1059,13 +1057,6 @@ function Library:CreateWindow(cfg)
                     option:Set(data.Value)
                 elseif option.Type == "Slider" and data.Type == "Slider" then
                     option:Set(data.Value)
-                elseif option.Type == "ListBox" and data.Type == "ListBox" then
-                    if data.Items then
-                        option.Items = data.Items
-                    end
-                    if data.Value then
-                        option:Set(data.Value)
-                    end
                 elseif option.Type == "Input" and data.Type == "Input" then
                     option.Value = data.Value
                     if option.Callback then option.Callback(data.Value) end
