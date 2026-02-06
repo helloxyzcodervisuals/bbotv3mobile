@@ -3,6 +3,37 @@ local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 --ngf
+local function Register_Font(Name, Weight, Style, Asset)
+    if not isfile(Asset.Id) then
+        writefile(Asset.Id, Asset.Font)
+    end
+
+    if isfile(Name .. ".font") then
+        delfile(Name .. ".font")
+    end
+
+    local Data = {
+        name = Name,
+        faces = {
+            {
+                name = "Normal",
+                weight = Weight,
+                style = Style,
+                assetId = getcustomasset(Asset.Id),
+            },
+        },
+    }
+    writefile(Name .. ".font", HttpService:JSONEncode(Data))
+
+    return getcustomasset(Name .. ".font")
+end
+
+local ProggyTiny = Register_Font("ProggyTinyFont", 100, "Normal", {
+    Id = "ProggyTiny.ttf",
+    Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/ProggyTiny.ttf"),
+})
+
+local mainFont = Font.new(ProggyTiny, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 local Library = {
     Options = {},
     Theme = {
@@ -12,7 +43,7 @@ local Library = {
         BorderColor = Color3.fromRGB(45, 45, 45),
         AccentColor = Color3.fromRGB(150, 100, 255),
         TextColor = Color3.fromRGB(240, 240, 240),
-        Font = Enum.Font.Code,
+        Font = mainFont,
     },
     ConfigFolder = "Zenwave_Configs",
     ThemeFolder = "Zenwave_Themes",
@@ -149,7 +180,7 @@ function Library:CreateWindow(cfg)
     Title.Text = " " .. (cfg.Title or "ZENWAVE")
     Title.Size = UDim2.new(1, 0, 1, 0)
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Font = self.Theme.Font
+    Title.FontFace = self.Theme.Font
     Title.TextSize = 14
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
@@ -189,7 +220,7 @@ function Library:CreateWindow(cfg)
         TabBtn.BorderColor3 = Library.Theme.BorderColor
         TabBtn.Text = name
         TabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-        TabBtn.Font = Library.Theme.Font
+        TabBtn.FontFace = Library.Theme.Font
         TabBtn.TextSize = 13
         
         local Page = Instance.new("Frame", Container)
@@ -246,7 +277,7 @@ function Library:CreateWindow(cfg)
             Label.Text = " " .. title:upper()
             Label.Size = UDim2.new(1, 0, 0, 18)
             Label.TextColor3 = Library.Theme.AccentColor
-            Label.Font = Library.Theme.Font
+            Label.FontFace = Library.Theme.Font
             Label.TextSize = 12
             Label.TextXAlignment = Enum.TextXAlignment.Left
             Label.BackgroundColor3 = Library.Theme.SectionColor
@@ -283,7 +314,7 @@ function Library:CreateWindow(cfg)
                 LabelText.Size = UDim2.new(1, 0, 1, 0)
                 LabelText.Text = Label.Value
                 LabelText.TextColor3 = Library.Theme.TextColor
-                LabelText.Font = Library.Theme.Font
+                LabelText.FontFace = Library.Theme.Font
                 LabelText.TextSize = 13
                 LabelText.TextXAlignment = Enum.TextXAlignment.Left
                 LabelText.BackgroundTransparency = 1
@@ -330,7 +361,7 @@ function Library:CreateWindow(cfg)
                 Btn.BackgroundTransparency = 1
                 Btn.Text = data.Text
                 Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-                Btn.Font = Library.Theme.Font
+                Btn.FontFace = Library.Theme.Font
                 Btn.TextXAlignment = Enum.TextXAlignment.Left
                 
                 local BoxG = Instance.new("Frame", Btn)
@@ -392,7 +423,7 @@ function Library:CreateWindow(cfg)
                 local L = Instance.new("TextLabel", SFrame)
                 L.Size = UDim2.new(1, 0, 0, 14)
                 L.TextColor3 = Color3.fromRGB(200, 200, 200)
-                L.Font = Library.Theme.Font
+                L.FontFace = Library.Theme.Font
                 L.BackgroundTransparency = 1
                 L.TextXAlignment = Enum.TextXAlignment.Left
                 
@@ -498,7 +529,7 @@ function Library:CreateWindow(cfg)
                         Opt.BackgroundColor3 = (LBox.Value == v) and Color3.fromRGB(35, 35, 35) or Color3.fromRGB(25, 25, 25)
                         Opt.Text = " " .. v
                         Opt.TextColor3 = (LBox.Value == v) and Library.Theme.AccentColor or Color3.fromRGB(180, 180, 180)
-                        Opt.Font = Library.Theme.Font
+                        Opt.FontFace = Library.Theme.Font
                         Opt.TextSize = 12
                         Opt.TextXAlignment = Enum.TextXAlignment.Left
                         Opt.BackgroundTransparency = 1
@@ -591,7 +622,7 @@ function Library:CreateWindow(cfg)
                 L.Text = data.Text
                 L.Size = UDim2.new(1, 0, 0, 14)
                 L.TextColor3 = Color3.fromRGB(200, 200, 200)
-                L.Font = Library.Theme.Font
+                L.FontFace = Library.Theme.Font
                 L.TextXAlignment = Enum.TextXAlignment.Left
                 L.BackgroundTransparency = 1
                 
@@ -601,7 +632,7 @@ function Library:CreateWindow(cfg)
                 Box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
                 Box.BorderColor3 = Library.Theme.BorderColor
                 Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-                Box.Font = Library.Theme.Font
+                Box.FontFace = Library.Theme.Font
                 Box.TextSize = 12
                 Box.Text = Inp.Value
                 
@@ -650,7 +681,7 @@ function Library:CreateWindow(cfg)
                 Btn.BorderColor3 = Library.Theme.BorderColor
                 Btn.Text = data.Text
                 Btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-                Btn.Font = Library.Theme.Font
+                Btn.FontFace = Library.Theme.Font
                 Btn.TextSize = 13
                 Btn.MouseButton1Click:Connect(data.Func)
                 Resize()
@@ -679,7 +710,7 @@ function Library:CreateWindow(cfg)
                 L.Text = data.Text
                 L.Size = UDim2.new(1, 0, 1, 0)
                 L.TextColor3 = Color3.fromRGB(200, 200, 200)
-                L.Font = Library.Theme.Font
+                L.FontFace = Library.Theme.Font
                 L.TextXAlignment = Enum.TextXAlignment.Left
                 L.BackgroundTransparency = 1
                 
@@ -849,7 +880,7 @@ function Library:CreateWindow(cfg)
                 Box.Position = UDim2.new(1, -65, 0.5, -7)
                 Box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                 Box.TextColor3 = Library.Theme.AccentColor
-                Box.Font = Library.Theme.Font
+                Box.FontFace = Library.Theme.Font
                 Box.TextSize = 10
                 Box.Text = KB.Value.Name
                 
@@ -926,7 +957,7 @@ function Library:CreateWindow(cfg)
         Title.Text = "KEYBINDS"
         Title.Size = UDim2.new(1, 0, 1, 0)
         Title.TextColor3 = Library.Theme.AccentColor
-        Title.Font = Library.Theme.Font
+        Title.FontFace = Library.Theme.Font
         Title.TextSize = 13
         Title.BackgroundTransparency = 1
         
@@ -959,7 +990,7 @@ function Library:CreateWindow(cfg)
                     NameLabel.Text = id
                     NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
                     NameLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-                    NameLabel.Font = Library.Theme.Font
+                    NameLabel.FontFace = Library.Theme.Font
                     NameLabel.TextSize = 12
                     NameLabel.TextXAlignment = Enum.TextXAlignment.Left
                     NameLabel.BackgroundTransparency = 1
@@ -969,7 +1000,7 @@ function Library:CreateWindow(cfg)
                     KeyLabel.Size = UDim2.new(0.4, 0, 1, 0)
                     KeyLabel.Position = UDim2.new(0.6, 0, 0, 0)
                     KeyLabel.TextColor3 = Library.Theme.AccentColor
-                    KeyLabel.Font = Library.Theme.Font
+                    KeyLabel.FontFace = Library.Theme.Font
                     KeyLabel.TextSize = 12
                     KeyLabel.TextXAlignment = Enum.TextXAlignment.Right
                     KeyLabel.BackgroundTransparency = 1
@@ -1132,7 +1163,7 @@ function Library:CreateWindow(cfg)
         Title.Text = "THEME EDITOR"
         Title.Size = UDim2.new(1, 0, 1, 0)
         Title.TextColor3 = Library.Theme.AccentColor
-        Title.Font = Library.Theme.Font
+        Title.FontFace = Library.Theme.Font
         Title.TextSize = 14
         Title.BackgroundTransparency = 1
         
@@ -1145,7 +1176,7 @@ function Library:CreateWindow(cfg)
         CloseBtn.BorderColor3 = Library.Theme.BorderColor
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-        CloseBtn.Font = Library.Theme.Font
+        CloseBtn.FontFace = Library.Theme.Font
         CloseBtn.TextSize = 14
         CloseBtn.MouseButton1Click:Connect(function()
             EditorFrame:Destroy()
@@ -1169,7 +1200,7 @@ function Library:CreateWindow(cfg)
             Label.Text = label
             Label.Size = UDim2.new(0.5, 0, 1, 0)
             Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-            Label.Font = Library.Theme.Font
+            Label.FontFace = Library.Theme.Font
             Label.TextSize = 12
             Label.BackgroundTransparency = 1
             Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -1221,7 +1252,7 @@ function Library:CreateWindow(cfg)
         SaveThemeBtn.BorderColor3 = Library.Theme.BorderColor
         SaveThemeBtn.Text = "SAVE THEME"
         SaveThemeBtn.TextColor3 = Library.Theme.AccentColor
-        SaveThemeBtn.Font = Library.Theme.Font
+        SaveThemeBtn.FontFace.= Library.Theme.Font
         SaveThemeBtn.TextSize = 14
         SaveThemeBtn.MouseButton1Click:Connect(function()
             Window:CreateSaveThemeUI()
@@ -1233,7 +1264,7 @@ function Library:CreateWindow(cfg)
         ApplyBtn.BorderColor3 = Library.Theme.BorderColor
         ApplyBtn.Text = "APPLY THEME"
         ApplyBtn.TextColor3 = Library.Theme.AccentColor
-        ApplyBtn.Font = Library.Theme.Font
+        ApplyBtn.FontFace = Library.Theme.Font
         ApplyBtn.TextSize = 14
         ApplyBtn.MouseButton1Click:Connect(function()
             Window:ApplyCurrentTheme()
@@ -1275,7 +1306,7 @@ function Library:CreateWindow(cfg)
         CloseBtn.BorderColor3 = Library.Theme.BorderColor
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-        CloseBtn.Font = Library.Theme.Font
+        CloseBtn.FontFace = Library.Theme.Font
         CloseBtn.TextSize = 14
         CloseBtn.MouseButton1Click:Connect(function()
             PickerFrame:Destroy()
@@ -1346,7 +1377,7 @@ function Library:CreateWindow(cfg)
         Title.Text = "SAVE THEME"
         Title.Size = UDim2.new(1, 0, 1, 0)
         Title.TextColor3 = Library.Theme.AccentColor
-        Title.Font = Library.Theme.Font
+        Title.FontFace = Library.Theme.Font
         Title.TextSize = 14
         Title.BackgroundTransparency = 1
         
@@ -1359,7 +1390,7 @@ function Library:CreateWindow(cfg)
         CloseBtn.BorderColor3 = Library.Theme.BorderColor
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-        CloseBtn.Font = Library.Theme.Font
+        CloseBtn.FontFace = Library.Theme.Font
         CloseBtn.TextSize = 14
         CloseBtn.MouseButton1Click:Connect(function()
             SaveFrame:Destroy()
@@ -1375,7 +1406,7 @@ function Library:CreateWindow(cfg)
         InputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         InputBox.BorderColor3 = Library.Theme.BorderColor
         InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-        InputBox.Font = Library.Theme.Font
+        InputBox.FontFace = Library.Theme.Font
         InputBox.TextSize = 12
         InputBox.PlaceholderText = "Enter theme name..."
         
@@ -1386,7 +1417,7 @@ function Library:CreateWindow(cfg)
         SaveBtn.BorderColor3 = Library.Theme.BorderColor
         SaveBtn.Text = "SAVE"
         SaveBtn.TextColor3 = Library.Theme.AccentColor
-        SaveBtn.Font = Library.Theme.Font
+        SaveBtn.FontFace = Library.Theme.Font
         SaveBtn.TextSize = 14
         SaveBtn.MouseButton1Click:Connect(function()
             if InputBox.Text ~= "" then
@@ -1561,7 +1592,7 @@ function Library:CreateWindow(cfg)
         Title.Text = "THEMES"
         Title.Size = UDim2.new(1, 0, 1, 0)
         Title.TextColor3 = Library.Theme.AccentColor
-        Title.Font = Library.Theme.Font
+        Title.FontFace = Library.Theme.Font
         Title.TextSize = 14
         Title.BackgroundTransparency = 1
         
@@ -1574,7 +1605,7 @@ function Library:CreateWindow(cfg)
         CloseBtn.BorderColor3 = Library.Theme.BorderColor
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-        CloseBtn.Font = Library.Theme.Font
+        CloseBtn.FontFace = Library.Theme.Font
         CloseBtn.TextSize = 14
         CloseBtn.MouseButton1Click:Connect(function()
             ThemeFrame:Destroy()
@@ -1600,7 +1631,7 @@ function Library:CreateWindow(cfg)
         EditorBtn.BorderColor3 = Library.Theme.BorderColor
         EditorBtn.Text = "THEME EDITOR"
         EditorBtn.TextColor3 = Library.Theme.AccentColor
-        EditorBtn.Font = Library.Theme.Font
+        EditorBtn.FontFace = Library.Theme.Font
         EditorBtn.TextSize = 14
         EditorBtn.MouseButton1Click:Connect(function()
             Window:CreateThemeEditor()
@@ -1613,7 +1644,7 @@ function Library:CreateWindow(cfg)
         PresetsBtn.BorderColor3 = Library.Theme.BorderColor
         PresetsBtn.Text = "PRESET THEMES"
         PresetsBtn.TextColor3 = Library.Theme.AccentColor
-        PresetsBtn.Font = Library.Theme.Font
+        PresetsBtn.FontFace = Library.Theme.Font
         PresetsBtn.TextSize = 14
         PresetsBtn.MouseButton1Click:Connect(function()
             Window:CreatePresetThemesUI()
@@ -1632,7 +1663,7 @@ function Library:CreateWindow(cfg)
                 NameLabel.Text = themeName
                 NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
                 NameLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-                NameLabel.Font = Library.Theme.Font
+                NameLabel.FontFace = Library.Theme.Font
                 NameLabel.TextSize = 12
                 NameLabel.TextXAlignment = Enum.TextXAlignment.Left
                 NameLabel.BackgroundTransparency = 1
@@ -1644,7 +1675,7 @@ function Library:CreateWindow(cfg)
                 LoadEntryBtn.BorderColor3 = Library.Theme.BorderColor
                 LoadEntryBtn.Text = "Load"
                 LoadEntryBtn.TextColor3 = Library.Theme.AccentColor
-                LoadEntryBtn.Font = Library.Theme.Font
+                LoadEntryBtn.FontFace = Library.Theme.Font
                 LoadEntryBtn.TextSize = 10
                 LoadEntryBtn.MouseButton1Click:Connect(function()
                     Window:LoadTheme(themeName)
@@ -1658,7 +1689,7 @@ function Library:CreateWindow(cfg)
                 DeleteEntryBtn.BorderColor3 = Library.Theme.BorderColor
                 DeleteEntryBtn.Text = "Delete"
                 DeleteEntryBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-                DeleteEntryBtn.Font = Library.Theme.Font
+                DeleteEntryBtn.FontFace = Library.Theme.Font
                 DeleteEntryBtn.TextSize = 10
                 DeleteEntryBtn.MouseButton1Click:Connect(function()
                     Window:DeleteTheme(themeName)
@@ -1690,7 +1721,7 @@ function Library:CreateWindow(cfg)
         Title.Text = "PRESET THEMES"
         Title.Size = UDim2.new(1, 0, 1, 0)
         Title.TextColor3 = Library.Theme.AccentColor
-        Title.Font = Library.Theme.Font
+        Title.FontFace = Library.Theme.Font
         Title.TextSize = 14
         Title.BackgroundTransparency = 1
         
@@ -1703,7 +1734,7 @@ function Library:CreateWindow(cfg)
         CloseBtn.BorderColor3 = Library.Theme.BorderColor
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-        CloseBtn.Font = Library.Theme.Font
+        CloseBtn.FontFace = Library.Theme.Font
         CloseBtn.TextSize = 14
         CloseBtn.MouseButton1Click:Connect(function()
             PresetFrame:Destroy()
@@ -1800,7 +1831,7 @@ function Library:CreateWindow(cfg)
             ThemeBtn.BorderColor3 = Library.Theme.BorderColor
             ThemeBtn.Text = preset.Name
             ThemeBtn.TextColor3 = preset.Theme.AccentColor
-            ThemeBtn.Font = Library.Theme.Font
+            ThemeBtn.FontFace = Library.Theme.Font
             ThemeBtn.TextSize = 14
             ThemeBtn.MouseButton1Click:Connect(function()
                 ApplyTheme(preset.Theme)
@@ -1847,7 +1878,7 @@ function Library:CreateWindow(cfg)
         Title.Text = "CONFIGURATIONS"
         Title.Size = UDim2.new(1, 0, 1, 0)
         Title.TextColor3 = Library.Theme.AccentColor
-        Title.Font = Library.Theme.Font
+        Title.FontFace = Library.Theme.Font
         Title.TextSize = 14
         Title.BackgroundTransparency = 1
         
@@ -1860,7 +1891,7 @@ function Library:CreateWindow(cfg)
         CloseBtn.BorderColor3 = Library.Theme.BorderColor
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-        CloseBtn.Font = Library.Theme.Font
+        CloseBtn.FontFace = Library.Theme.Font
         CloseBtn.TextSize = 14
         CloseBtn.MouseButton1Click:Connect(function()
             ConfigFrame:Destroy()
@@ -1885,7 +1916,7 @@ function Library:CreateWindow(cfg)
         ConfigInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         ConfigInput.BorderColor3 = Library.Theme.BorderColor
         ConfigInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-        ConfigInput.Font = Library.Theme.Font
+        ConfigInput.FontFace = Library.Theme.Font
         ConfigInput.TextSize = 12
         ConfigInput.PlaceholderText = "Config name..."
         ConfigInput.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
@@ -1897,7 +1928,7 @@ function Library:CreateWindow(cfg)
         SaveBtn.BorderColor3 = Library.Theme.BorderColor
         SaveBtn.Text = "Save"
         SaveBtn.TextColor3 = Library.Theme.AccentColor
-        SaveBtn.Font = Library.Theme.Font
+        SaveBtn.FontFace = Library.Theme.Font
         SaveBtn.TextSize = 12
         
         local LoadBtn = Instance.new("TextButton", InputFrame)
@@ -1907,7 +1938,7 @@ function Library:CreateWindow(cfg)
         LoadBtn.BorderColor3 = Library.Theme.BorderColor
         LoadBtn.Text = "Load"
         LoadBtn.TextColor3 = Library.Theme.AccentColor
-        LoadBtn.Font = Library.Theme.Font
+        LoadBtn.FontFace = Library.Theme.Font
         LoadBtn.TextSize = 12
         
         local function RefreshConfigList()
@@ -1923,7 +1954,7 @@ function Library:CreateWindow(cfg)
                 NameLabel.Text = configName
                 NameLabel.Size = UDim2.new(0.6, 0, 1, 0)
                 NameLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-                NameLabel.Font = Library.Theme.Font
+                NameLabel.FontFace = Library.Theme.Font
                 NameLabel.TextSize = 12
                 NameLabel.TextXAlignment = Enum.TextXAlignment.Left
                 NameLabel.BackgroundTransparency = 1
@@ -1935,7 +1966,7 @@ function Library:CreateWindow(cfg)
                 LoadEntryBtn.BorderColor3 = Library.Theme.BorderColor
                 LoadEntryBtn.Text = "Load"
                 LoadEntryBtn.TextColor3 = Library.Theme.AccentColor
-                LoadEntryBtn.Font = Library.Theme.Font
+                LoadEntryBtn.FontFace = Library.Theme.Font
                 LoadEntryBtn.TextSize = 10
                 LoadEntryBtn.MouseButton1Click:Connect(function()
                     Window:LoadConfig(configName)
@@ -1948,7 +1979,7 @@ function Library:CreateWindow(cfg)
                 DeleteEntryBtn.BorderColor3 = Library.Theme.BorderColor
                 DeleteEntryBtn.Text = "Delete"
                 DeleteEntryBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-                DeleteEntryBtn.Font = Library.Theme.Font
+                DeleteEntryBtn.FontFace = Library.Theme.Font
                 DeleteEntryBtn.TextSize = 10
                 DeleteEntryBtn.MouseButton1Click:Connect(function()
                     Window:DeleteConfig(configName)
@@ -1995,7 +2026,7 @@ function Library:CreateWindow(cfg)
     ToggleBtn.BorderColor3 = Library.Theme.BorderColor
     ToggleBtn.Text = "KEYBINDS"
     ToggleBtn.TextColor3 = Library.Theme.AccentColor
-    ToggleBtn.Font = Library.Theme.Font
+    ToggleBtn.FontFace = Library.Theme.Font
     ToggleBtn.TextSize = 12
     ToggleBtn.MouseButton1Click:Connect(function() Window:ToggleKeybindList() end)
     
@@ -2006,7 +2037,7 @@ function Library:CreateWindow(cfg)
     ConfigBtn.BorderColor3 = Library.Theme.BorderColor
     ConfigBtn.Text = "CONFIG"
     ConfigBtn.TextColor3 = Library.Theme.AccentColor
-    ConfigBtn.Font = Library.Theme.Font
+    ConfigBtn.FontFace = Library.Theme.Font
     ConfigBtn.TextSize = 12
     ConfigBtn.MouseButton1Click:Connect(function() Window:ToggleConfigUI() end)
     
@@ -2017,7 +2048,7 @@ function Library:CreateWindow(cfg)
     ThemeBtn.BorderColor3 = Library.Theme.BorderColor
     ThemeBtn.Text = "THEMES"
     ThemeBtn.TextColor3 = Library.Theme.AccentColor
-    ThemeBtn.Font = Library.Theme.Font
+    ThemeBtn.FontFace = Library.Theme.Font
     ThemeBtn.TextSize = 12
     ThemeBtn.MouseButton1Click:Connect(function() Window:ToggleThemeUI() end)
     
