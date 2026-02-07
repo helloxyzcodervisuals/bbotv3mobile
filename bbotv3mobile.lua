@@ -4954,6 +4954,7 @@
             
             return setmetatable(Cfg, Library)
 		end
+
         function Library:Configs(window) 
             local Text;
             local ConfigText; 
