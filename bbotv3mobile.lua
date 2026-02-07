@@ -12,7 +12,7 @@
 
     -- Extra data types
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
--- Yo
+-- Youxcv
 
 -- Library init
     getgenv().Library = {
@@ -287,7 +287,7 @@
             end)
 
             Library:Connection(InputService.InputChanged, function(Input, game_event) 
-                if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                     local NewPosition = dim2(
                         0,
                         InitialSize.X.Offset + (Input.Position.X - InitialPosition.X),
