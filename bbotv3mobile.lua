@@ -287,29 +287,18 @@
             end)
 
             Library:Connection(InputService.InputChanged, function(Input, game_event) 
-                if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
-                    local Horizontal = Camera.ViewportSize.X
-                    local Vertical = Camera.ViewportSize.Y
-
+                if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                     local NewPosition = dim2(
                         0,
-                        math.clamp(
-                            InitialSize.X.Offset + (Input.Position.X - InitialPosition.X),
-                            0,
-                            Horizontal - Parent.Size.X.Offset
-                        ),
+                        InitialSize.X.Offset + (Input.Position.X - InitialPosition.X),
                         0,
-                        math.clamp(
-                            InitialSize.Y.Offset + (Input.Position.Y - InitialPosition.Y),
-                            0,
-                            Vertical - Parent.Size.Y.Offset
-                        )
+                        InitialSize.Y.Offset + (Input.Position.Y - InitialPosition.Y)
                     )
 
                     Parent.Position = NewPosition
                 end
             end)
-        end 
+        end
 
         function Library:Convert(str)
             local Values = {}
