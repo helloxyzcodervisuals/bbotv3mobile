@@ -14,7 +14,7 @@
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
 
 
--- Library loaded
+-- Library loaded in bitchbot v3
     getgenv().Library = {
         Directory = "Bbot v3",
         Folders = {
@@ -4859,11 +4859,13 @@
                 Cfg.OptionInstances = {}
                 
                 for _, option in pairs(Cfg.Options) do
+                    local optionText = tostring(option)
+                    
                     local OptionButton = Library:Create( "TextButton" , {
                         FontFace = Library.Font;
                         TextColor3 = rgb(179, 179, 179);
                         BorderColor3 = rgb(0, 0, 0);
-                        Text = option;
+                        Text = optionText;
                         Parent = Items.ListContainer;
                         BackgroundTransparency = 1;
                         Name = "\0";
@@ -4888,12 +4890,12 @@
                     
                     OptionButton.MouseButton1Down:Connect(function()
                         if Cfg.Multi then
-                            local isSelected = table.find(Cfg.Selected, option)
+                            local isSelected = table.find(Cfg.Selected, optionText)
                             if isSelected then
                                 table.remove(Cfg.Selected, isSelected)
                                 OptionButton.TextColor3 = rgb(179, 179, 179)
                             else
-                                table.insert(Cfg.Selected, option)
+                                table.insert(Cfg.Selected, optionText)
                                 OptionButton.TextColor3 = themes.preset.text_color
                             end
                         else
@@ -4901,12 +4903,20 @@
                                 btn.TextColor3 = rgb(179, 179, 179)
                             end
                             OptionButton.TextColor3 = themes.preset.text_color
-                            Cfg.Selected = {option}
+                            Cfg.Selected = {optionText}
                         end
                         
                         Flags[Cfg.Flag] = Cfg.Multi and Cfg.Selected or Cfg.Selected[1]
                         Cfg.Callback(Flags[Cfg.Flag])
                     end)
+                    
+                    if Cfg.Multi then
+                        if table.find(Cfg.Selected, optionText) then
+                            OptionButton.TextColor3 = themes.preset.text_color
+                        end
+                    elseif Cfg.Selected[1] == optionText then
+                        OptionButton.TextColor3 = themes.preset.text_color
+                    end
                     
                     table.insert(Cfg.OptionInstances, OptionButton)
                 end
@@ -4915,10 +4925,16 @@
             function Cfg.Add(option)
                 if type(option) == "table" then
                     for _, opt in pairs(option) do
-                        table.insert(Cfg.Options, opt)
+                        local optText = tostring(opt)
+                        if not table.find(Cfg.Options, optText) then
+                            table.insert(Cfg.Options, optText)
+                        end
                     end
                 else
-                    table.insert(Cfg.Options, option)
+                    local optText = tostring(option)
+                    if not table.find(Cfg.Options, optText) then
+                        table.insert(Cfg.Options, optText)
+                    end
                 end
                 Cfg.Refresh()
             end
@@ -4926,26 +4942,56 @@
             function Cfg.Remove(option)
                 if type(option) == "table" then
                     for _, opt in pairs(option) do
-                        local index = table.find(Cfg.Options, opt)
+                        local optText = tostring(opt)
+                        local index = table.find(Cfg.Options, optText)
                         if index then
                             table.remove(Cfg.Options, index)
+                            
+                            local selectedIndex = table.find(Cfg.Selected, optText)
+                            if selectedIndex then
+                                table.remove(Cfg.Selected, selectedIndex)
+                            end
                         end
                     end
                 else
-                    local index = table.find(Cfg.Options, option)
+                    local optText = tostring(option)
+                    local index = table.find(Cfg.Options, optText)
                     if index then
                         table.remove(Cfg.Options, index)
+                        
+                        local selectedIndex = table.find(Cfg.Selected, optText)
+                        if selectedIndex then
+                            table.remove(Cfg.Selected, selectedIndex)
+                        end
                     end
                 end
                 Cfg.Refresh()
             end
             
             function Cfg.Set(options)
+                Cfg.Selected = {}
+                
                 if type(options) == "table" then
-                    Cfg.Options = options
+                    Cfg.Options = {}
+                    for _, opt in pairs(options) do
+                        table.insert(Cfg.Options, tostring(opt))
+                    end
                 elseif type(options) == "string" then
-                    Cfg.Options = {options}
+                    Cfg.Options = {tostring(options)}
+                else
+                    Cfg.Options = {}
                 end
+                
+                Cfg.Refresh()
+            end
+            
+            function Cfg.GetSelected()
+                return Cfg.Multi and Cfg.Selected or Cfg.Selected[1]
+            end
+            
+            function Cfg.Clear()
+                Cfg.Options = {}
+                Cfg.Selected = {}
                 Cfg.Refresh()
             end
             
@@ -4954,6 +5000,7 @@
             
             return setmetatable(Cfg, Library)
 		end
+                        
 
         function Library:Configs(window) 
             local Text;
