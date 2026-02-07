@@ -4744,7 +4744,216 @@
             
             return setmetatable(Cfg, Library)
         end
-
+        function Library:Listbox(properties)
+            local Cfg = {
+                Name = properties.Name or "Listbox";
+                Flag = properties.Flag or properties.Name or "Listbox";
+                Options = properties.Options or {};
+                Callback = properties.Callback or function() end;
+                Multi = properties.Multi or false;
+                Height = properties.Height or 150;
+                
+                Selected = {};
+                Items = {};
+                OptionInstances = {};
+            }
+            
+            Flags[Cfg.Flag] = Cfg.Multi and {} or nil
+            
+            local Items = Cfg.Items; do 
+                Items.Listbox = Library:Create( "TextButton" , {
+                    FontFace = Library.Font;
+                    TextColor3 = rgb(0, 0, 0);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Text = "";
+                    Parent = self.Items.GroupElements or self.Items.Elements;
+                    BackgroundTransparency = 1;
+                    Name = "\0";
+                    Size = dim2(1, 0, 0, Cfg.Height);
+                    BorderSizePixel = 0;
+                    TextSize = 14;
+                    BackgroundColor3 = rgb(255, 255, 255)
+                });
+                
+                Items.Name = Library:Create( "TextLabel" , {
+                    FontFace = Library.Font;
+                    TextColor3 = themes.preset.text_color;
+                    BorderColor3 = rgb(0, 0, 0);
+                    Text = Cfg.Name;
+                    Parent = Items.Listbox;
+                    BackgroundTransparency = 1;
+                    Position = dim2(0, 1, 0, 0);
+                    BorderSizePixel = 0;
+                    AutomaticSize = Enum.AutomaticSize.XY;
+                    TextSize = 12;
+                    BackgroundColor3 = rgb(255, 255, 255)
+                });
+                
+                Library:Create( "UIStroke" , {
+                    Parent = Items.Name;
+                    LineJoinMode = Enum.LineJoinMode.Miter
+                });
+                
+                Items.Container = Library:Create( "Frame" , {
+                    Parent = Items.Listbox;
+                    Name = "\0";
+                    Position = dim2(0, 0, 0, 20);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, 0, 1, -20);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = themes.preset.outline
+                });	Library:Themify(Items.Container, "outline", "BackgroundColor3")
+                
+                Items.Inline = Library:Create( "Frame" , {
+                    Parent = Items.Container;
+                    Name = "\0";
+                    Position = dim2(0, 1, 0, 1);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, -2, 1, -2);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = themes.preset.inline
+                });	Library:Themify(Items.Inline, "inline", "BackgroundColor3")
+                
+                Items.Background = Library:Create( "Frame" , {
+                    Parent = Items.Inline;
+                    Name = "\0";
+                    Position = dim2(0, 1, 0, 1);
+                    BorderColor3 = rgb(0, 0, 0);
+                    Size = dim2(1, -2, 1, -2);
+                    BorderSizePixel = 0;
+                    BackgroundColor3 = rgb(255, 255, 255)
+                });
+                
+                local gradient = Library:Create( "UIGradient" , {
+                    Rotation = 90;
+                    Parent = Items.Background;
+                    Color = rgbseq{rgbkey(0, themes.preset.inline), rgbkey(1, themes.preset.gradient)}
+                }); Library:SaveGradient(gradient, "Selected");
+                
+                Items.ListContainer = Library:Create( "ScrollingFrame" , {
+                    Active = true;
+                    ScrollingEnabled = true;
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                    BorderColor3 = rgb(0, 0, 0);
+                    ScrollBarImageColor3 = themes.preset.accent;
+                    Parent = Items.Background;
+                    Size = dim2(1, 0, 1, 0);
+                    Position = dim2(0, 0, 0, 0);
+                    BackgroundTransparency = 1;
+                    BorderSizePixel = 0;
+                    ScrollBarThickness = 2;
+                    CanvasSize = dim2(0, 0, 0, 0);
+                    BackgroundColor3 = rgb(255, 255, 255)
+                });	Library:Themify(Items.ListContainer, "accent", "ScrollBarImageColor3")
+                
+                Items.ListLayout = Library:Create( "UIListLayout" , {
+                    Parent = Items.ListContainer;
+                    SortOrder = Enum.SortOrder.LayoutOrder
+                });
+            end
+            
+            function Cfg.Refresh()
+                for _, instance in pairs(Cfg.OptionInstances) do
+                    instance:Destroy()
+                end
+                Cfg.OptionInstances = {}
+                
+                for _, option in pairs(Cfg.Options) do
+                    local OptionButton = Library:Create( "TextButton" , {
+                        FontFace = Library.Font;
+                        TextColor3 = rgb(179, 179, 179);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Text = option;
+                        Parent = Items.ListContainer;
+                        BackgroundTransparency = 1;
+                        Name = "\0";
+                        Size = dim2(1, -4, 0, 20);
+                        BorderSizePixel = 0;
+                        AutomaticSize = Enum.AutomaticSize.Y;
+                        TextSize = 12;
+                        BackgroundColor3 = rgb(255, 255, 255)
+                    });
+                    
+                    Library:Create( "UIStroke" , {
+                        Parent = OptionButton;
+                        LineJoinMode = Enum.LineJoinMode.Miter
+                    });
+                    
+                    Library:Create( "UIPadding" , {
+                        PaddingTop = dim(0, 2);
+                        PaddingBottom = dim(0, 2);
+                        Parent = OptionButton;
+                        PaddingLeft = dim(0, 4)
+                    });
+                    
+                    OptionButton.MouseButton1Down:Connect(function()
+                        if Cfg.Multi then
+                            local isSelected = table.find(Cfg.Selected, option)
+                            if isSelected then
+                                table.remove(Cfg.Selected, isSelected)
+                                OptionButton.TextColor3 = rgb(179, 179, 179)
+                            else
+                                table.insert(Cfg.Selected, option)
+                                OptionButton.TextColor3 = themes.preset.text_color
+                            end
+                        else
+                            for _, btn in pairs(Cfg.OptionInstances) do
+                                btn.TextColor3 = rgb(179, 179, 179)
+                            end
+                            OptionButton.TextColor3 = themes.preset.text_color
+                            Cfg.Selected = {option}
+                        end
+                        
+                        Flags[Cfg.Flag] = Cfg.Multi and Cfg.Selected or Cfg.Selected[1]
+                        Cfg.Callback(Flags[Cfg.Flag])
+                    end)
+                    
+                    table.insert(Cfg.OptionInstances, OptionButton)
+                end
+            end
+            
+            function Cfg.Add(option)
+                if type(option) == "table" then
+                    for _, opt in pairs(option) do
+                        table.insert(Cfg.Options, opt)
+                    end
+                else
+                    table.insert(Cfg.Options, option)
+                end
+                Cfg.Refresh()
+            end
+            
+            function Cfg.Remove(option)
+                if type(option) == "table" then
+                    for _, opt in pairs(option) do
+                        local index = table.find(Cfg.Options, opt)
+                        if index then
+                            table.remove(Cfg.Options, index)
+                        end
+                    end
+                else
+                    local index = table.find(Cfg.Options, option)
+                    if index then
+                        table.remove(Cfg.Options, index)
+                    end
+                end
+                Cfg.Refresh()
+            end
+            
+            function Cfg.Set(options)
+                if type(options) == "table" then
+                    Cfg.Options = options
+                elseif type(options) == "string" then
+                    Cfg.Options = {options}
+                end
+                Cfg.Refresh()
+            end
+            
+            Cfg.Refresh()
+            ConfigFlags[Cfg.Flag] = Cfg.Set
+            
+            return setmetatable(Cfg, Library)
+		end
         function Library:Configs(window) 
             local Text;
             local ConfigText; 
