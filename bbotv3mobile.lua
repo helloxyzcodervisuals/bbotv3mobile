@@ -12,7 +12,7 @@
 
     -- Extra data types
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
--- 
+-- Yo
 
 -- Library init
     getgenv().Library = {
@@ -4193,20 +4193,15 @@
                 Items = {};
             }
 
-            Flags[Cfg.Flag] = Cfg.default
+            Flags[Cfg.Flag] = Cfg.Default
 
             local Items = Cfg.Items; do 
-                Items.Textbox = Library:Create( "TextButton" , {
-                    FontFace = Library.Font;
-                    TextColor3 = rgb(0, 0, 0);
-                    BorderColor3 = rgb(0, 0, 0);
-                    Text = "";
+                Items.Textbox = Library:Create( "Frame" , {
                     Parent = self.Items.GroupElements or self.Items.Elements;
                     BackgroundTransparency = 1;
                     Name = "\0";
                     Size = dim2(1, 0, 0, 32);
                     BorderSizePixel = 0;
-                    TextSize = 14;
                     BackgroundColor3 = rgb(255, 255, 255)
                 });
                 
@@ -4249,13 +4244,13 @@
                 Items.Input = Library:Create( "TextBox" , {
                     FontFace = Library.Font;
                     ClearTextOnFocus = false;
-                    Active = false;
-                    Selectable = false;
+                    Active = true; 
+                    Selectable = true;
                     PlaceholderColor3 = themes.preset.text_color;
-                    PlaceholderText = "Hi!";
+                    PlaceholderText = Cfg.PlaceHolder;
                     TextSize = 12;
                     TextTruncate = Enum.TextTruncate.AtEnd;
-                    Size = dim2(1, 0, 1, 0);
+                    Size = dim2(1, -6, 1, 0);
                     TextColor3 = themes.preset.text_color;
                     BorderColor3 = rgb(0, 0, 0);
                     Text = Cfg.Default;
@@ -4295,19 +4290,25 @@
                 });                
             end 
             
+            local updating = false
             function Cfg.Set(text) 
+                if updating then return end
+                updating = true
+                
                 Flags[Cfg.Flag] = text
-
                 Items.Input.Text = text
-
                 Cfg.Callback(text)
+                
+                updating = false
             end 
             
             Items.Input:GetPropertyChangedSignal("Text"):Connect(function()
-                Cfg.Set(Items.Input.Text) 
+                if not updating then
+                    Cfg.Set(Items.Input.Text)
+                end
             end) 
 
-            if Cfg.Default then 
+            if Cfg.Default ~= "" then 
                 Cfg.Set(Cfg.Default) 
             end
 
@@ -4315,7 +4316,6 @@
 
             return setmetatable(Cfg, Library)
         end
-
         function Library:Keybind(properties) 
             local Cfg = {
                 Flag = properties.Flag or properties.Name;
