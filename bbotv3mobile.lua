@@ -14,7 +14,7 @@
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
 
 
--- Library init
+-- Library loading
     getgenv().Library = {
         Directory = "Bbot v3",
         Folders = {
@@ -35,7 +35,7 @@
             inline = rgb(50, 50, 50);
             gradient = rgb(40, 40, 40);
             outline = rgb(20, 20, 20);
-            accent = rgb(50, 119, 186);
+            accent = rgb(255,255,255);
             background = rgb(30, 30, 30);
             text_color = rgb(239, 239, 239);
             text_outline = rgb(0, 0, 0);
@@ -287,7 +287,7 @@
             end)
 
             Library:Connection(InputService.InputChanged, function(Input, game_event) 
-                if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
                     local NewPosition = dim2(
                         0,
                         InitialSize.X.Offset + (Input.Position.X - InitialPosition.X),
