@@ -1,5 +1,5 @@
 -- Probably my newest code up to date thats available publicly. 
--- Made around march - april 2025
+-- Made around march - February 2026
 
 -- Variables 
     -- Services
@@ -12,7 +12,7 @@
 
     -- Extra data types
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
--- Youxcv
+
 
 -- Library init
     getgenv().Library = {
