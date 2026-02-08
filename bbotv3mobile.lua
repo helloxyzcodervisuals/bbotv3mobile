@@ -1,6 +1,6 @@
 -- Probably my newest code up to date thats available publicly. 
 -- Made around march - February 2026
--- listbox add
+-- listbox modification of table
 
 -- Variables 
     -- Services
