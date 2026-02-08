@@ -4156,7 +4156,7 @@
                     AutomaticSize = Enum.AutomaticSize.Y;
                     Size = dim2(1, -6, 0, 0);
                     BackgroundTransparency = 1;
-                    TextColor3 = rgb(255,255,255);
+                    TextColor3 = rgb(200,200,200);
                     BorderSizePixel = 0;
                     Name = "\0";
                 })
@@ -4196,7 +4196,7 @@
                         btn.TextColor3 = themes.preset.text_color
                         table.insert(Selected, btn.Text)
                     else
-                        btn.TextColor3 = rgb(255,255,255)
+                        btn.TextColor3 = rgb(200,200,200)
                     end
                 end
 
