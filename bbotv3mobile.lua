@@ -10,7 +10,7 @@
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
 
 
--- Library enhhh
+-- Library 
     getgenv().Library = {
         Directory = "Bbot v3",
         Folders = {
@@ -4058,7 +4058,7 @@
             local Cfg = {
                 Name = properties.Name or nil;
                 Flag = properties.Flag or properties.Name or "Listbox";
-                Options = properties.Options or {};
+                Options = {};
                 Callback = properties.Callback or function() end;
                 Multi = properties.Multi or false;
                 Scrolling = properties.Scrolling ~= false;
@@ -4070,9 +4070,27 @@
                 Ignore = properties.Ignore or false;
             }
 
+            local function NormalizeValue(v)
+                if type(v) == "string" or type(v) == "number" or type(v) == "boolean" then
+                    return tostring(v)
+                end
+                return nil
+            end
+
+            if type(properties.Options) == "table" then
+                for _, v in properties.Options do
+                    local nv = NormalizeValue(v)
+                    if nv then
+                        table.insert(Cfg.Options, nv)
+                    end
+                end
+            end
+
             Cfg.Default = properties.Default
-            if not Cfg.Multi and type(Cfg.Default) == "table" then
-                Cfg.Default = Cfg.Default[1]
+            if type(Cfg.Default) == "table" then
+                Cfg.Default = NormalizeValue(Cfg.Default[1])
+            else
+                Cfg.Default = NormalizeValue(Cfg.Default)
             end
 
             Flags[Cfg.Flag] = Cfg.Multi and {} or nil
@@ -4083,6 +4101,7 @@
                     Size = dim2(1, 0, 0, Cfg.Height);
                     BorderSizePixel = 0;
                     BackgroundColor3 = themes.preset.outline;
+                    BackgroundTransparency = 1;
                     Name = "\0";
                 }); Library:Themify(Items.Holder, "outline", "BackgroundColor3")
 
@@ -4092,6 +4111,7 @@
                     Size = dim2(1, -2, 1, -2);
                     BorderSizePixel = 0;
                     BackgroundColor3 = themes.preset.inline;
+                    BackgroundTransparency = 1;
                     Name = "\0";
                 }); Library:Themify(Items.Inline, "inline", "BackgroundColor3")
 
@@ -4101,6 +4121,7 @@
                     Size = dim2(1, -2, 1, -2);
                     BorderSizePixel = 0;
                     BackgroundColor3 = rgb(255, 255, 255);
+                    BackgroundTransparency = 1;
                     Name = "\0";
                 })
 
@@ -4145,14 +4166,16 @@
             end
 
             function Cfg.SetHeight(height)
-                Cfg.Height = height
-                Items.Holder.Size = dim2(1, 0, 0, height)
+                if type(height) == "number" then
+                    Cfg.Height = height
+                    Items.Holder.Size = dim2(1, 0, 0, height)
+                end
             end
 
             function Cfg.RenderOption(text)
                 local Button = Library:Create("TextButton", {
                     Parent = Items.List;
-                    Text = tostring(text);
+                    Text = text;
                     FontFace = Library.Font;
                     TextSize = 12;
                     TextXAlignment = Enum.TextXAlignment.Left;
@@ -4174,15 +4197,15 @@
 
                 Button.MouseButton1Down:Connect(function()
                     if Cfg.Multi then
-                        local Index = table.find(Cfg.MultiItems, Button.Text)
+                        local Index = table.find(Cfg.MultiItems, text)
                         if Index then
                             table.remove(Cfg.MultiItems, Index)
                         else
-                            table.insert(Cfg.MultiItems, Button.Text)
+                            table.insert(Cfg.MultiItems, text)
                         end
                         Cfg.Set(Cfg.MultiItems)
                     else
-                        Cfg.Set(Button.Text)
+                        Cfg.Set(text)
                     end
                 end)
 
@@ -4194,9 +4217,19 @@
                 local Selected = {}
                 local IsTable = type(value) == "table"
 
-                if not Cfg.Multi and IsTable then
-                    value = value[1]
-                    IsTable = false
+                if not Cfg.Multi then
+                    if IsTable then
+                        value = NormalizeValue(value[1])
+                        IsTable = false
+                    else
+                        value = NormalizeValue(value)
+                    end
+                end
+
+                if not value and not IsTable then
+                    Flags[Cfg.Flag] = nil
+                    Cfg.Callback(nil)
+                    return
                 end
 
                 for _, btn in Cfg.OptionInstances do
@@ -4227,30 +4260,35 @@
                 Cfg.Options = {}
 
                 for _, opt in options do
-                    table.insert(Cfg.Options, tostring(opt))
-                    Cfg.RenderOption(opt)
+                    local nv = NormalizeValue(opt)
+                    if nv then
+                        table.insert(Cfg.Options, nv)
+                        Cfg.RenderOption(nv)
+                    end
                 end
             end
 
             function Cfg.Add(option)
-                if type(option) ~= "string" then
-                    option = tostring(option)
-                end
-
-                if table.find(Cfg.Options, option) then
+                local nv = NormalizeValue(option)
+                if not nv then
                     return
                 end
 
-                table.insert(Cfg.Options, option)
-                Cfg.RenderOption(option)
+                if table.find(Cfg.Options, nv) then
+                    return
+                end
+
+                table.insert(Cfg.Options, nv)
+                Cfg.RenderOption(nv)
             end
 
             function Cfg.Remove(option)
-                if type(option) ~= "string" then
-                    option = tostring(option)
+                local nv = NormalizeValue(option)
+                if not nv then
+                    return
                 end
 
-                local Index = table.find(Cfg.Options, option)
+                local Index = table.find(Cfg.Options, nv)
                 if not Index then
                     return
                 end
@@ -4258,14 +4296,14 @@
                 table.remove(Cfg.Options, Index)
 
                 for i, btn in ipairs(Cfg.OptionInstances) do
-                    if btn.Text == option then
+                    if btn.Text == nv then
                         btn:Destroy()
                         table.remove(Cfg.OptionInstances, i)
                         break
                     end
                 end
 
-                local Sel = table.find(Cfg.MultiItems, option)
+                local Sel = table.find(Cfg.MultiItems, nv)
                 if Sel then
                     table.remove(Cfg.MultiItems, Sel)
                     Cfg.Set(Cfg.MultiItems)
@@ -4278,12 +4316,12 @@
 
             Cfg.RefreshOptions(Cfg.Options)
 
-            if Cfg.Default ~= nil then
+            if Cfg.Default then
                 Cfg.Set(Cfg.Default)
             end
 
             return setmetatable(Cfg, Library)
-		end
+        end
         function Library:Label(properties)
             local Cfg = {
                 Name = properties.Name or "Label",
