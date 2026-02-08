@@ -4852,6 +4852,31 @@
                 });
             end
             
+            local function processOptionValue(value)
+                if type(value) == "string" then
+                    return value
+                elseif type(value) == "number" then
+                    return tostring(value)
+                elseif type(value) == "boolean" then
+                    return tostring(value)
+                elseif type(value) == "table" then
+                    local result = {}
+                    for k, v in pairs(value) do
+                        if type(k) == "number" then
+                            table.insert(result, processOptionValue(v))
+                        else
+                            table.insert(result, k .. "=" .. processOptionValue(v))
+                        end
+                    end
+                    return "{" .. table.concat(result, ", ") .. "}"
+                elseif type(value) == "function" then
+                    local info = debug.getinfo(value)
+                    return "function:" .. (info.name or "anonymous") .. "@" .. (info.linedefined or 0)
+                else
+                    return tostring(value)
+                end
+            end
+            
             function Cfg.Refresh()
                 for _, instance in pairs(Cfg.OptionInstances) do
                     instance:Destroy()
@@ -4859,7 +4884,11 @@
                 Cfg.OptionInstances = {}
                 
                 for _, option in pairs(Cfg.Options) do
-                    local optionText = tostring(option)
+                    local optionText = processOptionValue(option)
+                    
+                    if optionText == "" then
+                        continue
+                    end
                     
                     local OptionButton = Library:Create( "TextButton" , {
                         FontFace = Library.Font;
@@ -4925,13 +4954,23 @@
             function Cfg.Add(option)
                 if type(option) == "table" then
                     for _, opt in pairs(option) do
-                        local optText = tostring(opt)
+                        local optText = processOptionValue(opt)
+                        
+                        if optText == "" then
+                            continue
+                        end
+                        
                         if not table.find(Cfg.Options, optText) then
                             table.insert(Cfg.Options, optText)
                         end
                     end
                 else
-                    local optText = tostring(option)
+                    local optText = processOptionValue(option)
+                    
+                    if optText == "" then
+                        return
+                    end
+                    
                     if not table.find(Cfg.Options, optText) then
                         table.insert(Cfg.Options, optText)
                     end
@@ -4942,7 +4981,7 @@
             function Cfg.Remove(option)
                 if type(option) == "table" then
                     for _, opt in pairs(option) do
-                        local optText = tostring(opt)
+                        local optText = processOptionValue(opt)
                         local index = table.find(Cfg.Options, optText)
                         if index then
                             table.remove(Cfg.Options, index)
@@ -4954,7 +4993,7 @@
                         end
                     end
                 else
-                    local optText = tostring(option)
+                    local optText = processOptionValue(option)
                     local index = table.find(Cfg.Options, optText)
                     if index then
                         table.remove(Cfg.Options, index)
@@ -4970,16 +5009,20 @@
             
             function Cfg.Set(options)
                 Cfg.Selected = {}
+                Cfg.Options = {}
                 
                 if type(options) == "table" then
-                    Cfg.Options = {}
                     for _, opt in pairs(options) do
-                        table.insert(Cfg.Options, tostring(opt))
+                        local optText = processOptionValue(opt)
+                        if optText ~= "" then
+                            table.insert(Cfg.Options, optText)
+                        end
                     end
-                elseif type(options) == "string" then
-                    Cfg.Options = {tostring(options)}
-                else
-                    Cfg.Options = {}
+                elseif type(options) == "string" or type(options) == "number" then
+                    local optText = processOptionValue(options)
+                    if optText ~= "" then
+                        table.insert(Cfg.Options, optText)
+                    end
                 end
                 
                 Cfg.Refresh()
@@ -4993,6 +5036,10 @@
                 Cfg.Options = {}
                 Cfg.Selected = {}
                 Cfg.Refresh()
+            end
+            
+            function Cfg.GetOptions()
+                return Cfg.Options
             end
             
             Cfg.Refresh()
