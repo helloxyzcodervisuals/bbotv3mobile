@@ -1,9 +1,4 @@
--- Probably my newest code up to date thats available publicly. 
--- Made around march - February 2026
--- listbox modification of table
 
--- Variables 
-    -- Services
     local InputService, HttpService, GuiService, RunService, Stats, CoreGui, TweenService, SoundService, Workspace, Players = game:GetService("UserInputService"), game:GetService("HttpService"), game:GetService("GuiService"), game:GetService("RunService"), game:GetService("Stats"), game:GetService("CoreGui"), game:GetService("TweenService"), game:GetService("SoundService"), game:GetService("Workspace"), game:GetService("Players")
     local Camera, lp, gui_offset = Workspace.CurrentCamera, Players.LocalPlayer, GuiService:GetGuiInset().Y
     local mouse = lp:GetMouse()
@@ -4103,6 +4098,7 @@
                     BorderSizePixel = 0;
                     BackgroundColor3 = rgb(255, 255, 255);
                     Name = "\0";
+					BackgroundTransparency = 1;
                 })
 
                 Items.Title = Library:Create("TextLabel", {
@@ -4160,7 +4156,7 @@
                     AutomaticSize = Enum.AutomaticSize.Y;
                     Size = dim2(1, -6, 0, 0);
                     BackgroundTransparency = 1;
-                    TextColor3 = rgb(179, 179, 179);
+                    TextColor3 = rgb(255,255,255);
                     BorderSizePixel = 0;
                     Name = "\0";
                 })
@@ -4200,7 +4196,7 @@
                         btn.TextColor3 = themes.preset.text_color
                         table.insert(Selected, btn.Text)
                     else
-                        btn.TextColor3 = rgb(179, 179, 179)
+                        btn.TextColor3 = rgb(255,255,255)
                     end
                 end
 
