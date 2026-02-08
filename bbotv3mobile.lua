@@ -10,7 +10,7 @@
     local color, rgb, hex, hsv, rgbseq, rgbkey, numseq, numkey = Color3.new, Color3.fromRGB, Color3.fromHex, Color3.fromHSV, ColorSequence.new, ColorSequenceKeypoint.new, NumberSequence.new, NumberSequenceKeypoint.new
 
 
--- Library loaded in bitchbot v3
+-- Library start
     getgenv().Library = {
         Directory = "Bbot v3",
         Folders = {
